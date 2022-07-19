@@ -1,0 +1,54 @@
+= String과 StringBuilder
+
+언제 주워듣고 기억하고 있는건지는 모르겠지만, 문자열 연산이 필요할 때 String을 사용하면 성능 상 좋지 않으니, StringBuilder 또는 StringBuffer를 사용해라. 라는 걸 별 생각없이 실천해오고 있었다. 특히 쿼리문을 직접 문자열로 들고 있는 레거시 프로젝트에서는 문자열 연산이 상대적으로 대량으로 빈번하게 일어나기 때문에 자주 사용해왔다. 어제도 문자열 연산을 하게 되어서 [.line-through]#아무 생각없이# 평소처럼 StringBuilder를 사용했는데, 인텔리제이에서 다음과 같은 사실을 알려주었다.
+
+[,java]
+----
+public class StringTest {
+    public static void main(String[] args) {
+        StringBuilder result01 = new StringBuilder();
+        result01.append("안녕하세요");
+        result01.append("저는 게으른 개발자입니다.");
+        result01.append("오늘도 날이 참 덥군요.");
+        result01.append("이럴 때 재택 근무를 하게 해준 회사에 정말 감사합니다.");
+        result01.append("열심히 일하겠습니다.");
+    }
+}
+----
+
+    'StringBuilder result01' can be replaced with 'String'
+
+
+잉? ...
+
+String으로 문자열 연산을 하게 되면, 값이 더해질 때마다 새로운 객체가 생성되고, 이전의 문자열 객체는 쓰레기가 되면서 GC가 쓸데없이일어나고.. 이런거 아니었나.
+
+====
+The Java language provides special support for the string concatenation operator ( + ), and for conversion of other objects to strings. String concatenation is implemented through the StringBuilder(or StringBuffer) class and its append method. String conversions are implemented through the method toString, defined by Object and inherited by all classes in Java.
+====
+Java 1.8 기준으로 https://docs.oracle.com/javase/8/docs/api/java/lang/String.html[문서]를 확인해보면, String의 `+` 연산이 발생할 경우, 내부적으로 `StringBuilder` 또는 `StringBuffer` 와 `append` 메소드를 통해 구현된다고 한다. 찾아보니 JDK 1.5 버전부터 `StringBuilder` 가 도입되면서 생긴 기능이라고 하는데... 나는 거의 JDK 1.8 으로 개발을 시작했는데 왜 이렇게 대충 알고 있는게 많은 건지 반성한다.
+
+[,java]
+----
+public class StringBuilderTest {
+    public static void main(String[] args) {
+        String result01 =
+                "안녕하세요" +
+                "저는 게으른 개발자입니다." +
+                "오늘도 날이 참 덥군요." +
+                "이럴 때 재택 근무를 하게 해준 회사에 정말 감사합니다." +
+                "열심히 일하겠습니다.";
+
+        System.out.println(result01);
+    }
+}
+----
+인텔리제이가 추천한대로 코드를 수정하면 String `+` 연산을 사용한다. 사실 `StringBuilder` 를 사용하면서도 참 가독성이 떨어진다고 생각했는데 String `+` 연산으로 수정하고 나니 코드도 간결해지고 좋은 것 같다.
+
+그런데, String에 값을 초기화할 때 발생하는 문자열은 컴파일러가 내부적으로 `StringBuilder` 를 생성해서 처리해주는 건 알겠는데, 기존에 값이 있는 String에 `+` 연산을 하게 되면 어떻게 되려나?
+
+== 더 공부해봐야 할 것
+* 나는 아무래도 `String` 과 `StringBuilder`, `StringBuffer` 에 대해 잘 모르는 것 같다.
+* 컴파일러가 모든 경우를 커버해주는 건 아닌 것 같다. 경우에 따라 `StringBuilder` 객체를 매번 생성하는 식으로 구현이 되기도 한다고 한다.
+* 난 JDK 8을 주로 사용하고 있지만, JDK 9 이상부터는 단순히 `StringBuilder` 와 `append` 메소드로 동작하는게 아니라 다른 방식을 사용한다고 한다.
+

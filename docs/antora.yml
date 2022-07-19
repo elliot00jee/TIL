@@ -4,8 +4,8 @@ version: latest
 display_version: default
 asciidoc:
   attributes:
-  source-language: asciidoc@
-  xrefstyle: short@
-  listing-caption: Example@
+    source-language: asciidoc@
+    xrefstyle: short@
+    listing-caption: Example@
 nav:
   - modules/2022-07/nav.adoc

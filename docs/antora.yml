@@ -9,3 +9,4 @@ asciidoc:
     listing-caption: Example@
 nav:
   - modules/2022-07/nav.adoc
+  - modules/2025-11/nav.adoc
